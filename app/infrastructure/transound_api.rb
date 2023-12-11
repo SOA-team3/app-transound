@@ -17,17 +17,17 @@ module TranSound
         @request.get_root.success?
       end
 
-    #   def episodes_list(list)
-    #     @request.episodes_list(list)
-    #   end
+      def episodes_list(list)
+        @request.episodes_list(list)
+      end
 
       def add_episode(type, id)
         @request.add_episode(type, id)
       end
 
-    #   def shows_list(list)
-    #     @request.shows_list(list)
-    #   end
+      def shows_list(list)
+        @request.shows_list(list)
+      end
 
       def add_show(type, id)
         @request.add_show(type, id)
@@ -51,19 +51,19 @@ module TranSound
           call_api('get')
         end
 
-        # def episodes_list(list)
-        #   call_api('get', ['episodes'],
-        #            'list' => Value::WatchedList.to_encoded(list))
-        # end
+        def episodes_list(list)
+          call_api('get', ['podcast_info/'],
+                   'episodes/' => Value::WatchedList.to_encoded(list))
+        end
 
         def add_episode(type, id)
           call_api('get', ['podcast_info', type, id])
         end
 
-        # def shows_list(list)
-        #   call_api('get', ['shows'],
-        #            'list' => Value::WatchedList.to_encoded(list))
-        # end
+        def shows_list(list)
+          call_api('get', ['podcast_info/'],
+                   'shows/' => Value::WatchedList.to_encoded(list))
+        end
 
         def add_show(type, id)
           call_api('get', ['podcast_info', type, id])
