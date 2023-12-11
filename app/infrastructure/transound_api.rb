@@ -52,8 +52,8 @@ module TranSound
         end
 
         def episodes_list(list)
-          call_api('get', ['podcast_info/'],
-                   'episodes/' => Value::WatchedList.to_encoded(list))
+          call_api('get', ['podcast_info/episode'],
+                   'list' => Value::WatchedList.to_encoded(list))
         end
 
         def add_episode(type, id)
@@ -61,8 +61,8 @@ module TranSound
         end
 
         def shows_list(list)
-          call_api('get', ['podcast_info/'],
-                   'shows/' => Value::WatchedList.to_encoded(list))
+          call_api('get', ['podcast_info/show'],
+                   'list' => Value::WatchedList.to_encoded(list))
         end
 
         def add_show(type, id)
@@ -77,11 +77,12 @@ module TranSound
 
         def params_str(params)
           params.map { |key, value| "#{key}=#{value}" }.join('&')
-            .then { |str| str ? "#{str}" : '' } #為什麼有個問號
+            .then { |str| str ? "?#{str}" : '' } # 為什麼有個問號
         end
 
         def call_api(method, resources = [], params = {})
           api_path = resources.empty? ? @api_host : @api_root
+          puts "api_path: #{api_path}"
           url = [api_path, resources].flatten.join('/') + params_str(params)
           HTTP.headers('Accept' => 'application/json').send(method, url)
             .then { |http_response| Response.new(http_response) }

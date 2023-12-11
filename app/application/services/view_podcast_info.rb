@@ -56,12 +56,14 @@ module TranSound
         requested = input[:requested]
         type = requested.type
 
+        puts "view: #{view_podcast_info_json}"
+
         if type == 'episode'
-          Representer::Episode.new(Struct.new)
+          Representer::EpisodesList.new(Struct.new)
             .from_json(view_podcast_info_json)
             .then { |view_podcast_info| Success(view_podcast_info) }
         elsif type == 'show'
-          Representer::Show.new(Struct.new)
+          Representer::ShowsList.new(Struct.new)
             .from_json(view_podcast_info_json)
             .then { |view_podcast_info| Success(view_podcast_info) }
         end

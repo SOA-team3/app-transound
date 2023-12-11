@@ -24,7 +24,8 @@ module TranSound
       end
 
       def reify_list(episodes_json)
-        Representer::EpisodesList.new(Struct.new)
+        puts "list: #{shows_list}"
+        Representer::Episode.new(Struct.new)
           .from_json(episodes_json)
           .then { |episodes| Success(episodes) }
       rescue StandardError
@@ -51,9 +52,10 @@ module TranSound
         Failure('Could not access our API')
       end
 
-      def reify_list(shows_list)
-        Representer::ShowsList.new(Struct.new)
-          .from_json(shows_list)
+      def reify_list(shows_json)
+        puts "list: #{shows_json}"
+        Representer::Show.new(Struct.new)
+          .from_json(shows_json)
           .then { |shows| Success(shows) }
       rescue StandardError
         Failure('Could not parse response from API')
