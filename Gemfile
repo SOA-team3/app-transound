@@ -3,16 +3,22 @@
 source 'https://rubygems.org'
 ruby File.read('.ruby-version').strip
 
+# CONFIGURATION
 # Configuration and Utilities
 gem 'figaro', '~> 1.0'
 gem 'pry'
 gem 'rake'
 
-# Web Application
+# PRESENTATION LAYER
+gem 'slim', '~> 5'
+
+# APPLICATION LAYER
+# Web Application related
+gem 'multi_json', '~> 1.15'
 gem 'puma', '~> 6'
 gem 'rack-session', '~> 0.3'
+gem 'roar', '~> 1.0'
 gem 'roda', '~> 3'
-gem 'slim', '~> 5'
 
 # Controllers and services
 gem 'dry-monads', '~> 1.4'
@@ -23,6 +29,7 @@ gem 'dry-validation', '~> 1.7'
 gem 'dry-struct', '~> 1'
 gem 'dry-types', '~> 1'
 
+# INFRASTRUCTURE LAYER
 # Networking
 gem 'http', '~> 5.1'
 
@@ -44,7 +51,7 @@ group :production do
   gem 'pg', '~> 1.2'
 end
 
-# Testing
+# TESTING
 group :test do
   gem 'minitest', '~> 5.0'
   gem 'minitest-rg', '~> 5.0'

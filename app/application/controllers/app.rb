@@ -64,6 +64,8 @@ module TranSound
 
       # podcast_info
       routing.on 'podcast_info' do
+        TranSound::Podcast::Api::Token.new(App.config, App.config.spotify_Client_ID,
+                                           App.config.spotify_Client_secret, TEMP_TOKEN_CONFIG).get
         puts TEMP_TOKEN_CONFIG
 
         routing.is do
