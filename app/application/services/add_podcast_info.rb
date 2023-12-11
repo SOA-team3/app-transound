@@ -39,7 +39,7 @@ module TranSound
       end
 
       def reify_podcast_info(input_json)
-        puts "hello2: #{input_json}"
+        puts "add: #{input_json}"
         if @type == 'episode'
           handle_reify_episode(input_json)
         elsif @type == 'show'
@@ -61,20 +61,19 @@ module TranSound
       def handle_request_show(input)
         result = Gateway::Api.new(TranSound::App.config)
           .add_show(input[:type], input[:id])
-        puts "end: #{result.inspect}"
         result.success? ? Success(result.payload) : Failure(result.message)
       end
 
       def handle_reify_episode(episode_json)
         puts "episode_json: #{episode_json}"
-        Representer::Episode.new(Struct.new)
+        Representer::Episode.new(OpenStruct.new)
           .from_json(episode_json)
           .then { |episode| Success(episode) }
       end
 
       def handle_reify_show(show_json)
         puts "show_json: #{show_json}"
-        Representer::Show.new(Struct.new)
+        Representer::Show.new(OpenStruct.new)
           .from_json(show_json)
           .then { |show| Success(show) }
       end

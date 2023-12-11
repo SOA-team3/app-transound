@@ -25,7 +25,7 @@ module TranSound
 
       def reify_list(episodes_json)
         puts "list: #{shows_list}"
-        Representer::Episode.new(Struct.new)
+        Representer::Episode.new(OpenStruct.new)
           .from_json(episodes_json)
           .then { |episodes| Success(episodes) }
       rescue StandardError
@@ -54,7 +54,7 @@ module TranSound
 
       def reify_list(shows_json)
         puts "list: #{shows_json}"
-        Representer::Show.new(Struct.new)
+        Representer::Show.new(OpenStruct.new)
           .from_json(shows_json)
           .then { |shows| Success(shows) }
       rescue StandardError

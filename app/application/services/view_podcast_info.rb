@@ -18,11 +18,12 @@ module TranSound
 
       def validate_podcast_info(input)
         requested = input[:requested]
-        type = requested.type
+        @type = requested.type
+        puts "view: #{input.inspect}"
 
-        if type == 'episode'
+        if @type == 'episode'
           handle_validate_episode(requested, input)
-        elsif type == 'show'
+        elsif @type == 'show'
           handle_validate_show(requested, input)
         end
       end
@@ -47,23 +48,24 @@ module TranSound
         result = Gateway::Api.new(TranSound::App.config)
           .view(input[:requested])
 
+        puts "view2: #{result.payload}"
+
         result.success? ? Success(result.payload) : Failure(result.message)
       rescue StandardError
         Failure('Cannot view podcast info right now. Please try again later')
       end
 
       def reify_view_podcast_info(view_podcast_info_json)
-        requested = input[:requested]
-        type = requested.type
+        puts "#{@type}"
 
-        puts "view: #{view_podcast_info_json}"
+        puts "view3: #{view_podcast_info_json}"
 
-        if type == 'episode'
-          Representer::EpisodesList.new(Struct.new)
+        if @type == 'episode'
+          Representer::Episode.new(OpenStruct.new)
             .from_json(view_podcast_info_json)
             .then { |view_podcast_info| Success(view_podcast_info) }
-        elsif type == 'show'
-          Representer::ShowsList.new(Struct.new)
+        elsif @type == 'show'
+          Representer::Show.new(OpenStruct.new)
             .from_json(view_podcast_info_json)
             .then { |view_podcast_info| Success(view_podcast_info) }
         end

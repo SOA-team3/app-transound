@@ -126,18 +126,20 @@ module TranSound
               requested: path_request
             )
 
+            puts "app.rb: #{result}"
+            puts "app.rb:2 #{result.value!}"
+
             if result.failure?
               flash[:error] = result.failure
               routing.redirect '/'
             end
 
             languages_dict = Views::LanguagesList.new.lang_dict
+            podcast_info = result.value!
             case type
-            when 'episode'
-              podcast_info = result.value![:episode]
+            when 'episode'             
               view 'episode', locals: { episode: podcast_info, lang_dict: languages_dict }
             when 'show'
-              podcast_info = result.value![:show]
               view 'show', locals: { show: podcast_info, lang_dict: languages_dict }
             else
               # Handle unknown URLs (unknown type)
