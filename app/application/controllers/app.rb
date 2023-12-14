@@ -15,6 +15,7 @@ module TranSound
     plugin :halt
     plugin :flash
     plugin :all_verbs # allows HTTP verbs beyond GET/POST (e.g., DELETE)
+    plugin :caching
     plugin :render, engine: 'slim', views: 'app/presentation/views_html'
     plugin :public, root: 'app/presentation/public'
     plugin :assets, path: 'app/presentation/assets',
@@ -85,7 +86,6 @@ module TranSound
             puts "podcast_info's class: #{podcast_info.class}"
 
             # Add new podcast_info to watched set in cookies
-
             if type == 'episode'
               session[:watching][:episode_id].insert(0, podcast_info.origin_id).uniq!
             elsif type == 'show'
@@ -136,8 +136,15 @@ module TranSound
 
             languages_dict = Views::LanguagesList.new.lang_dict
             podcast_info = result.value!
+
+            # Show viewer the project
+            # Only use browser caching in production
+            # App.configure :production do
+            response.expires 400, public: true
+            # end
+
             case type
-            when 'episode'             
+            when 'episode'
               view 'episode', locals: { episode: podcast_info, lang_dict: languages_dict }
             when 'show'
               view 'show', locals: { show: podcast_info, lang_dict: languages_dict }
