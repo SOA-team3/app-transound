@@ -34,7 +34,7 @@ module TranSound
         # Get cookie viewer's previously seen podcast_infos
         session[:watching] ||= { episode_id: [], show_id: [] }
 
-        puts "Session watching: #{session[:watching].inspect}"
+        puts "app.rb, Session watching: #{session[:watching].inspect}"
 
         episode_result = Service::ListEpisodes.new.call(session[:watching][:episode_id])
         show_result = Service::ListShows.new.call(session[:watching][:show_id])
@@ -126,16 +126,10 @@ module TranSound
               requested: path_request
             )
 
-            puts "app.rb: #{result}"
-            puts "app.rb:2 #{result.value!}"
-
             if result.failure?
               flash[:error] = result.failure
               routing.redirect '/'
             end
-
-            languages_dict = Views::LanguagesList.new.lang_dict
-            podcast_info = result.value!
 
             # Show viewer the project
             # Only use browser caching in production
@@ -143,11 +137,17 @@ module TranSound
             response.expires 400, public: true
             # end
 
+            languages_dict = Views::LanguagesList.new.lang_dict
+            podcast_info = result.value!
+
+            puts "app.rb, routing.get, result: #{result}"
+            puts "app.rb, routing.get, podcast_info: #{podcast_info[:shows]}"
+
             case type
             when 'episode'
-              view 'episode', locals: { episode: podcast_info, lang_dict: languages_dict }
+              view 'episode', locals: { episode: podcast_info[:episode], lang_dict: languages_dict }
             when 'show'
-              view 'show', locals: { show: podcast_info, lang_dict: languages_dict }
+              view 'show', locals: { show: podcast_info[:shows], lang_dict: languages_dict }
             else
               # Handle unknown URLs (unknown type)
               routing.redirect '/'

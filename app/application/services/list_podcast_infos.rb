@@ -14,6 +14,7 @@ module TranSound
       private
 
       def get_api_list(episodes_list)
+        puts "list1: #{episodes_list}"
         Gateway::Api.new(TranSound::App.config)
           .episodes_list(episodes_list)
           .then do |result|
@@ -24,8 +25,8 @@ module TranSound
       end
 
       def reify_list(episodes_json)
-        puts "list: #{shows_list}"
-        Representer::Episode.new(OpenStruct.new)
+        puts "list2: #{episodes_json}"
+        Representer::EpisodesList.new(OpenStruct.new)
           .from_json(episodes_json)
           .then { |episodes| Success(episodes) }
       rescue StandardError
@@ -43,6 +44,7 @@ module TranSound
       private
 
       def get_api_list(shows_list)
+        puts "list3: #{shows_list}"
         Gateway::Api.new(TranSound::App.config)
           .shows_list(shows_list)
           .then do |result|
@@ -53,8 +55,8 @@ module TranSound
       end
 
       def reify_list(shows_json)
-        puts "list: #{shows_json}"
-        Representer::Show.new(OpenStruct.new)
+        puts "list4: #{shows_json}"
+        Representer::ShowsList.new(OpenStruct.new)
           .from_json(shows_json)
           .then { |shows| Success(shows) }
       rescue StandardError

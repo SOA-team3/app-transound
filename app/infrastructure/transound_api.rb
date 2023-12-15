@@ -57,16 +57,18 @@ module TranSound
         end
 
         def add_episode(type, id)
-          call_api('get', ['podcast_info', type, id])
+          call_api('post', ['podcast_info', type, id])
         end
 
         def shows_list(list)
+          puts "api, shows_list: #{shows_list}"
           call_api('get', ['podcast_info/show'],
                    'list' => Value::WatchedList.to_encoded(list))
         end
 
         def add_show(type, id)
-          call_api('get', ['podcast_info', type, id])
+          puts "api, add_show: #{type} + #{id}"
+          call_api('post', ['podcast_info', type, id])
         end
 
         def view_podcast_info(req)
