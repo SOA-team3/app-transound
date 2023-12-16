@@ -131,21 +131,19 @@ module TranSound
               routing.redirect '/'
             end
 
-            # Show viewer the project
-            # Only use browser caching in production
-            # App.configure :production do
-            response.expires 400, public: true
-            # end
-
             languages_dict = Views::LanguagesList.new.lang_dict
             podcast_info = result.value!
 
             puts "app.rb, routing.get, result: #{result}"
-            puts "app.rb, routing.get, podcast_info: #{podcast_info[:shows]}"
+
+            # Only use browser caching in production
+            App.configure :development, :test, :production do
+              response.expires 400, public: true
+            end
 
             case type
             when 'episode'
-              view 'episode', locals: { episode: podcast_info[:episode], lang_dict: languages_dict }
+              view 'episode', locals: { episode: podcast_info[:episodes], lang_dict: languages_dict }
             when 'show'
               view 'show', locals: { show: podcast_info[:shows], lang_dict: languages_dict }
             else
