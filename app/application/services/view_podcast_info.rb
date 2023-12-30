@@ -8,38 +8,27 @@ module TranSound
     class ViewPodcastInfo
       include Dry::Transaction
 
-      step :ensure_watched_podcast_info
-      step :retrieve_remote_podcast_info
+      step :validate_podcast_info
+      step :retrieve_podcast_info
+      step :reify_view_podcast_info
 
       private
 
       # Steps
 
-      def ensure_watched_podcast_info(input)
+      def validate_podcast_info(input)
         requested = input[:requested]
-        type = requested.type
+        @type = requested.type
+        puts "view: #{input.inspect}"
 
-        if type == 'episode'
-          handle_ensure_watched_episode(requested, input)
-        elsif type == 'show'
-          handle_ensure_watched_show(requested, input)
+        if @type == 'episode'
+          handle_validate_episode(requested, input)
+        elsif @type == 'show'
+          handle_validate_show(requested, input)
         end
       end
 
-      def retrieve_remote_podcast_info(input)
-        request = input[:requested]
-        type = request.type
-
-        if type == 'episode'
-          handle_retrieve_remote_episode(request, input)
-        elsif type == 'show'
-          handle_retrieve_remote_show(request, input)
-        end
-      rescue StandardError
-        Failure('Having trouble accessing the database')
-      end
-
-      def handle_ensure_watched_episode(requested, input)
+      def handle_validate_episode(requested, input)
         if input[:watched_list][:episode_id].include? requested.id
           Success(input)
         else
@@ -47,7 +36,7 @@ module TranSound
         end
       end
 
-      def handle_ensure_watched_show(requested, input)
+      def handle_validate_show(requested, input)
         if input[:watched_list][:show_id].include? requested.id
           Success(input)
         else
@@ -55,18 +44,33 @@ module TranSound
         end
       end
 
-      def handle_retrieve_remote_episode(request, input)
-        input[:episode] = Repository::For.klass(Entity::Episode).find_podcast_info(
-          request.id
-        )
-        input[:episode] ? Success(input) : Failure('Episode not found')
+      def retrieve_podcast_info(input)
+        result = Gateway::Api.new(TranSound::App.config)
+          .view(input[:requested])
+
+        puts "view2: #{result.payload}"
+
+        result.success? ? Success(result.payload) : Failure(result.message)
+      rescue StandardError
+        Failure('Cannot view podcast info right now. Please try again later')
       end
 
-      def handle_retrieve_remote_show(request, input)
-        input[:show] = Repository::For.klass(Entity::Show).find_podcast_info(
-          request.id
-        )
-        input[:show] ? Success(input) : Failure('Show not found')
+      def reify_view_podcast_info(view_podcast_info_json)
+        puts "#{@type}"
+
+        puts "view3: #{view_podcast_info_json}"
+
+        if @type == 'episode'
+          Representer::EpisodesView.new(OpenStruct.new)
+            .from_json(view_podcast_info_json)
+            .then { |view_podcast_info| Success(view_podcast_info) }
+        elsif @type == 'show'
+          Representer::ShowsView.new(OpenStruct.new)
+            .from_json(view_podcast_info_json)
+            .then { |view_podcast_info| Success(view_podcast_info) }
+        end
+      rescue StandardError
+        Failure('Error in our podcast info -- please try again')
       end
     end
   end

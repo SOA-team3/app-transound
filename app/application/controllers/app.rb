@@ -15,6 +15,7 @@ module TranSound
     plugin :halt
     plugin :flash
     plugin :all_verbs # allows HTTP verbs beyond GET/POST (e.g., DELETE)
+    plugin :caching
     plugin :render, engine: 'slim', views: 'app/presentation/views_html'
     plugin :public, root: 'app/presentation/public'
     plugin :assets, path: 'app/presentation/assets',
@@ -33,7 +34,7 @@ module TranSound
         # Get cookie viewer's previously seen podcast_infos
         session[:watching] ||= { episode_id: [], show_id: [] }
 
-        puts "Session watching: #{session[:watching].inspect}"
+        puts "app.rb, Session watching: #{session[:watching].inspect}"
 
         episode_result = Service::ListEpisodes.new.call(session[:watching][:episode_id])
         show_result = Service::ListShows.new.call(session[:watching][:show_id])
@@ -64,6 +65,8 @@ module TranSound
 
       # podcast_info
       routing.on 'podcast_info' do
+        TranSound::Podcast::Api::Token.new(App.config, App.config.spotify_Client_ID,
+                                           App.config.spotify_Client_secret, TEMP_TOKEN_CONFIG).get
         puts TEMP_TOKEN_CONFIG
 
         routing.is do
@@ -83,7 +86,6 @@ module TranSound
             puts "podcast_info's class: #{podcast_info.class}"
 
             # Add new podcast_info to watched set in cookies
-
             if type == 'episode'
               session[:watching][:episode_id].insert(0, podcast_info.origin_id).uniq!
             elsif type == 'show'
@@ -130,13 +132,20 @@ module TranSound
             end
 
             languages_dict = Views::LanguagesList.new.lang_dict
+            podcast_info = result.value!
+
+            puts "app.rb, routing.get, result: #{result}"
+
+            # Only use browser caching in production
+            App.configure :development, :test, :production do
+              response.expires 400, public: true
+            end
+
             case type
             when 'episode'
-              podcast_info = result.value![:episode]
-              view 'episode', locals: { episode: podcast_info, lang_dict: languages_dict }
+              view 'episode', locals: { episode: podcast_info[:episodes], lang_dict: languages_dict }
             when 'show'
-              podcast_info = result.value![:show]
-              view 'show', locals: { show: podcast_info, lang_dict: languages_dict }
+              view 'show', locals: { show: podcast_info[:shows], lang_dict: languages_dict }
             else
               # Handle unknown URLs (unknown type)
               routing.redirect '/'
