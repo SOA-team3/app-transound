@@ -7,6 +7,8 @@ require 'rack'
 
 require_relative 'helpers'
 
+TEMP_TOKEN_CONFIG = YAML.safe_load_file('config/temp_token.yml')
+
 module TranSound
   # Application inherits from Roda
   class App < Roda

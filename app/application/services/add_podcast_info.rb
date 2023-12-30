@@ -2,8 +2,6 @@
 
 require 'dry/transaction'
 
-TEMP_TOKEN_CONFIG = YAML.safe_load_file('config/temp_token.yml')
-
 module TranSound
   module Service
     # Transaction to store episode from Spotify API to database
