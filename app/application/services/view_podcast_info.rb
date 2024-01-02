@@ -56,17 +56,13 @@ module TranSound
       end
 
       def reify_view_podcast_info(view_podcast_info_json)
-        puts "#{@type}"
-
-        puts "view3: #{view_podcast_info_json}"
+        puts @type
 
         if @type == 'episode'
-          Representer::EpisodesView.new(OpenStruct.new)
-            .from_json(view_podcast_info_json)
+          Representer::EpisodesView.new(OpenStruct.new).from_json(view_podcast_info_json)
             .then { |view_podcast_info| Success(view_podcast_info) }
         elsif @type == 'show'
-          Representer::ShowsView.new(OpenStruct.new)
-            .from_json(view_podcast_info_json)
+          Representer::ShowsView.new(OpenStruct.new).from_json(view_podcast_info_json)
             .then { |view_podcast_info| Success(view_podcast_info) }
         end
       rescue StandardError
