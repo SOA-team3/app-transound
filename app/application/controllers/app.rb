@@ -9,10 +9,30 @@ require_relative 'helpers'
 
 TEMP_TOKEN_CONFIG = YAML.safe_load_file('config/temp_token.yml')
 
+module EpisodeInfoAccessors
+  def self.episode_info=(info)
+    @episode_info = info
+  end
+
+  def self.episode_info
+    @episode_info
+  end
+
+  def self.check=(info)
+    @check = info
+  end
+
+  def self.check
+    @check
+  end
+end
+
 module TranSound
   # Application inherits from Roda
   class App < Roda
     include RouteHelpers
+
+    include EpisodeInfoAccessors
 
     plugin :halt
     plugin :flash
@@ -46,7 +66,7 @@ module TranSound
           viewable_episodes = []
         else
           episodes = episode_result.value!
-          flash.now[:notice] = 'Add a Spotify Podcast Episode to get started' if episodes.none?
+          flash.now[:notice] = 'Add a Spotify Podcast Episode or Show to get started' if episodes.none? || shows.none?
           session[:watching][:episode_id] = episodes.map(&:origin_id)
           viewable_episodes = Views::EpisodesList.new(episodes)
         end
@@ -56,7 +76,7 @@ module TranSound
           viewable_shows = []
         else
           shows = show_result.value!
-          flash.now[:notice] = 'You can add a Spotify Podcast Show to get started' if shows.none?
+          flash.now[:notice] = 'Add a Spotify Podcast Episode or Show to get started' if shows.none? || episodes.none?
           session[:watching][:show_id] = shows.map(&:origin_id)
           viewable_shows = Views::ShowsList.new(shows)
         end
@@ -69,12 +89,13 @@ module TranSound
       routing.on 'podcast_info' do
         TranSound::Podcast::Api::Token.new(App.config, App.config.spotify_Client_ID,
                                            App.config.spotify_Client_secret, TEMP_TOKEN_CONFIG).get
-        puts TEMP_TOKEN_CONFIG
+        puts "app.rb, routing on: #{TEMP_TOKEN_CONFIG}"
 
         routing.is do
-          # POST /episode/
+          # POST /episode/ or /show/
           routing.post do
             url_requests = Forms::NewPodcastInfo.new.call(routing.params)
+            type, id = url_requests.values[:spotify_url].split('/')[-2..]
             podcast_info_made = Service::AddPodcastInfo.new.call(url_requests)
 
             if podcast_info_made.failure?
@@ -82,22 +103,23 @@ module TranSound
               routing.redirect '/'
             end
 
+            puts "app, app.rb, type, id: #{type}, #{id}"
             podcast_info = podcast_info_made.value!
-            type = podcast_info.type
-            id = podcast_info.origin_id
-            puts "podcast_info's class: #{podcast_info.class}"
+            puts "app, app.rb, podcast_info: #{podcast_info}"
 
-            # Add new podcast_info to watched set in cookies
             if type == 'episode'
-              session[:watching][:episode_id].insert(0, podcast_info.origin_id).uniq!
+              EpisodeInfoAccessors.check = 0
+              EpisodeInfoAccessors.episode_info = OpenStruct.new(podcast_info)
+              flash[:notice] = 'Episode added to your list'
+              session[:watching][:episode_id].insert(0, id).uniq!
+              routing.redirect "podcast_info/episode/#{id}"
             elsif type == 'show'
+              # Add new podcast_info to watched set in cookies
               session[:watching][:show_id].insert(0, podcast_info.origin_id).uniq!
+              flash[:notice] = 'Show added to your list'
+              # Redirect viewer to show page
+              routing.redirect "podcast_info/show/#{id}"
             end
-
-            flash[:notice] = 'Podcast info added to your list'
-
-            # Redirect viewer to episode page or show page
-            routing.redirect "podcast_info/#{type}/#{id}"
           end
         end
 
@@ -123,35 +145,86 @@ module TranSound
 
             session[:watching] ||= { episode_id: [], show_id: [] }
 
-            result = Service::ViewPodcastInfo.new.call(
-              watched_list: session[:watching],
-              requested: path_request
-            )
+            if type == 'episode'
+              episode_info = EpisodeInfoAccessors.episode_info
+              puts "app, routing.get: #{episode_info}"
 
-            if result.failure?
-              flash[:error] = result.failure
-              routing.redirect '/'
-            end
+              if episode_info.response.processing? && EpisodeInfoAccessors.check == 0
+                puts 'app, app.rb, episode processing'
+                flash.now[:notice] = 'The episode is being processed...'
 
-            languages_dict = Views::LanguagesList.new.lang_dict
-            podcast_info = result.value!
+                processing = Views::EpisodeProcessing.new(
+                  App.config, episode_info.response
+                )
 
-            puts "app.rb, routing.get, result: #{result}"
+                puts "processing: #{processing.inspect}"
 
-            # Only use browser caching in production
-            App.configure :development, :test, :production do
-              response.expires 400, public: true
-            end
+                EpisodeInfoAccessors.check = 1
 
-            case type
-            when 'episode'
-              view 'episode', locals: { episode: podcast_info[:episodes], lang_dict: languages_dict }
-            when 'show'
+                view 'episode', locals: { check: EpisodeInfoAccessors.check, processing: }
+              else
+                puts 'app, app.rb, episode else'
+
+                result = Service::ViewPodcastInfo.new.call(
+                  watched_list: session[:watching],
+                  requested: path_request
+                )
+
+                if result.failure?
+                  flash[:error] = result.failure
+                  routing.redirect '/'
+                end
+
+                languages_dict = Views::LanguagesList.new.lang_dict
+                podcast_info = result.value!
+
+                puts "app.rb, routing.get, result: #{result}"
+
+                # Only use browser caching in production
+                App.configure :development, :test, :production do
+                  response.expires 400, public: true
+                end
+
+                EpisodeInfoAccessors.check = 0
+
+                view 'episode',
+                     locals: { check: EpisodeInfoAccessors.check, episode: podcast_info[:episodes], lang_dict: languages_dict }
+
+              end
+            elsif type == 'show'
+              result = Service::ViewPodcastInfo.new.call(
+                watched_list: session[:watching],
+                requested: path_request
+              )
+
+              if result.failure?
+                flash[:error] = result.failure
+                routing.redirect '/'
+              end
+
+              languages_dict = Views::LanguagesList.new.lang_dict
+              podcast_info = result.value!
+
+              puts "app.rb, routing.get, result: #{result}"
+
+              # Only use browser caching in production
+              App.configure :development, :test, :production do
+                response.expires 400, public: true
+              end
+
               view 'show', locals: { show: podcast_info[:shows], lang_dict: languages_dict }
-            else
-              # Handle unknown URLs (unknown type)
-              routing.redirect '/'
+
             end
+
+            # case type
+            # when 'episode'
+            #   view 'episode', locals: { episode: podcast_info[:episodes], lang_dict: languages_dict }
+            # when 'show'
+            #   view 'show', locals: { show: podcast_info[:shows], lang_dict: languages_dict }
+            # else
+            #   # Handle unknown URLs (unknown type)
+            #   routing.redirect '/'
+            # end
           end
         end
       end

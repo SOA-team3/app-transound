@@ -103,12 +103,28 @@ module TranSound
           code.between?(SUCCESS_CODES.first, SUCCESS_CODES.last)
         end
 
-        def message
-          payload['message']
-        end
-
         def payload
           body.to_s
+        end
+
+        def failure?
+          !success?
+        end
+
+        def ok?
+          code == 200
+        end
+
+        def added?
+          code == 201
+        end
+
+        def processing?
+          code == 202
+        end
+
+        def message
+          JSON.parse(payload)['message']
         end
       end
     end
