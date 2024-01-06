@@ -25,7 +25,7 @@
       // Collect progressbar element and percentage
       var progress = bar.getAttribute("style")
       var currentProgress = reg.exec(progress)[1]
-      
+
       if (isNaN(message)) {
         bar.setAttribute("style", "width:100%")
         bar.setAttribute("class", "progress-bar bg-danger progress-bar-striped")
@@ -50,243 +50,414 @@
   hr
   .container
     .row
-      .left-sidebar.col-lg-3.d-flex.flex-column.align-items-center
-        h5.mt-4
-          span.decoration
-            | Episode Information
-          div.center
-            img.episode.images.img-thumbnail[src=episode.images alt="#{episode.images}" style="width: 80%; height: auto; margin: 10%;"]
-          h5.episode.name.mt-4.text-info
-            = episode.name
-          span.show.attribute
-            | Release Date:&nbsp
-            = episode.release_date
-          span.show.attribute
-            | Language:&nbsp
-            = episode.language
-          span.show.attribute.p-4
-            | Description:&nbsp
-            = episode.description
-            // button.collapse-button(type="button") Show/Hide Description
-            // .collapsible-content
-          span.episode.attribute 【Episode URL】&nbsp
-          a.episode.episode_url.text-primary href="#{episode.episode_url}" Click here to visit Spotify Episode page-#{episode.name}
-          span.episode.attribute 【Episode MP3 URL】&nbsp
-          a.episode.episode_mp3_url.text-primary href="#{episode.episode_mp3_url}" Click here to visit Spotify Episode MP3 page-#{episode.name}
+      .nav.nav-tabs.d-flex.justify-content-center
+          a.nav-link#translationTabLink.mr-2(href="#translationTab", data-bs-toggle="tab" data-bs-target="#translationTab" class="active") Direct Translation
+          a.nav-link#languageLearningTabLink(href="#languageLearningTab", data-bs-toggle="tab" data-bs-target="#languageLearningTab") Language Learning
+      .tab-content
+        #translationTab.tab-pane.show.active
+          .row
+            .left-sidebar.col-lg-3.d-flex.flex-column.align-items-center.p-3
+                h3.decoration
+                  | Episode Information
+                div.center
+                  img.episode.images.img-thumbnail[src=episode.images alt="#{episode.images}"]
+                h5.episode.name.text-info
+                  = episode.name
+                span.show.attribute
+                  | Release Date:&nbsp
+                  = episode.release_date
+                span.show.attribute
+                  | Language:&nbsp
+                  = episode.language
+                span.show.attribute
+                  | Podcast Length(seconds) &nbsp
+                  - podcast_length = (episode.podcast_length)/1000.round
+                  = podcast_length
+                hr.thead_hr
+                span.show.attribute Description &nbsp
+                div
+                  = episode.description
+                hr
+                span.episode.attribute 【Episode URL】&nbsp
+                a.btn.btn-primary.episode.episode_url href="#{episode.episode_url}" target="_blank" style="color: white;font-size:1em" #{episode.name}
+                hr
+                span.episode.attribute 【Episode MP3 URL】&nbsp
+                a.btn.btn-primary.episode.episode_url href="#{episode.episode_mp3_url}" target="_blank" style="color: white;font-size:1em" #{episode.name}
 
-      .right-sidebar.col-lg-5.border.border-secondary.rounded
-        .scrollable-content
-          h3.title_txt
-            i.bi.bi-bookmarks-fill Transcript
-          div.row
-          .col.d-flex.align-items-center
-            select#sel1.form-control.border.border-secondary name="languages"
-              / optgroup label=("European")
-              option(value="" disabled="" selected="")
-                | Select a language
-                / span.i.bi.bi-download
-              - lang_dict.each do |key, value|
-                option value=key
-                  = key
-            
-            span.title_txt.mr-2.ml-2
-              h6.button#translateButton.btn.btn-primary Click to Translate
-            span.h2.title_txt
-              button.btn.btn-primary.download-btn data-toggle="tooltip" data-placement="top" title="Download" onclick="downloadTranscript()"
-                i.bi.bi-download
-
-            hr
-          div.list-group.transcript-content.pt-1
-            div.row
-              div
-                / | This is a transcript content........
-                = episode.transcript
-            / div.row
-            /   div.col-md-9
-            /     div.small.text-gray
-            /       span.bi.bi-person-circle &nbsp;
-            /       | Speaker A
-            /       span . 01:36
-            /     div This is a transcript content........
-            / div.row
-            /   div.col-md-9
-            /     div.small.text-gray
-            /       span.bi.bi-person-circle &nbsp;
-            /       | Speaker B
-            /       span . 02:59
-            /     div This is a transcript content........
-          button.btn.btn-primary.mt-4
-            | Generate Summary & Outline &nbsp;
-            span.i.bi.bi-arrow-right
-
-
-      .right-sidebar.col-lg-4.border.border-secondary.rounded
-            .scrollable-content
-              h3.title_txt
-                i.bi.bi-bookmarks-fill Translation
-              button.btn.btn-primary.download-btn data-toggle="tooltip" data-placement="top" title="Download" onclick="downloadTranscript()"
-                i.bi.bi-download
-                
-              div.list-group.translate-content.pt-3
+            .right-sidebar.col-lg-5.border.border-secondary.rounded
+              .scrollable-content
+                h3.title_txt
+                  i.bi.bi-bookmarks-fill Transcript
                 div.row
-                  / div.col-md-9#translationContent
-                  div data-new-content="Your new content goes here."
-                    / | This is a translation-content........
-                    = episode.translation
+                .col.d-flex.align-items-center
+                  select#sel1.form-control.border.border-secondary name="languages"
 
-  /off canvas
+                    / optgroup label=("European")
+                    option(value="" disabled="" selected="")
+                      | Select a language
+                      span 🔽
+                    - lang_dict.each do |key, value|
+                      option value=key
+                        = key
+                      span 🔽
+
+                  span.title_txt.mr-2.ml-2
+                    h6.button.btn.btn-primary#translateButton(data-lang-dict-value="#{lang_dict.to_json}")
+                      | Click to Translate
+                  span.h2.title_txt
+                    - text_loc = ".list-group.transcript-content.pt-1 div[data-new-content]"
+                    button.btn.btn-link.download-btn data-toggle="tooltip" data-placement="top" title="Download" onclick="downloadText('Transcription','#{episode.name}','#{text_loc}')"
+                      i.bi.bi-download
+
+                  hr
+                div.list-group.transcript-content.pt-1
+                  div.row
+                    div data-new-content="episode_transcript"
+                      - sentences = JSON.parse(episode.sentence_segments)
+                      - transcript = sentences.join("<br>")
+                      == transcript
+                      - transcript_String = transcript.gsub(/[[:punct:]\s]+/, ' ')  # filter all the punct and \n
+                      - total_word_counts = transcript_String.split.size
+
+            .right-sidebar.col-lg-4.border.border-secondary.rounded
+                  .scrollable-content
+                    div.d-flex.justify-content-between
+                      h3.title_txt
+                        i.bi.bi-globe Translation
+                      - text_loc = ".list-group.translate-content.pt-3 div[data-new-content]"
+                      span.btn.btn.btn-link.download-btn(data-toggle="tooltip" data-placement="top" title="Download" onclick="downloadText('Translation','#{episode.name}','#{text_loc}')")
+                        i.bi.bi-download
+                    hr.mb-2
+                    br
+                    div.list-group.translate-content.pt-3
+                      div.row
+                        / div.col-md-9#translationContent
+                        div data-new-content="episode_translation"
+                          - translate_array = JSON.parse(episode.translation)
+                          - translation = translate_array.join("<br>")
+                          == translation
+
+    //episode transcript & translation from DB represented by loop
+    .row
+    .tab-content
+      #languageLearningTab.tab-pane
+        .row
+          .left-sidebar.col-lg-3.d-flex.flex-column.align-items-center.p-3
+              h3.decoration
+                | Episode Information
+              div.center
+                img.episode.images.img-thumbnail[src=episode.images alt="#{episode.images}"]
+              h5.episode.name.text-info
+                = episode.name
+              span.show.attribute
+                | Release Date:&nbsp
+                = episode.release_date
+              span.show.attribute
+                | Language:&nbsp
+                = episode.language
+              span.show.attribute
+                | Podcast Length(seconds):&nbsp
+                - podcast_length = (episode.podcast_length)/1000.round
+                = podcast_length
+              hr
+              span.show.attribute Description &nbsp
+              div
+                = episode.description
+              hr
+              span.episode.attribute 【Episode URL】&nbsp
+              a.btn.btn-primary.episode.episode_url href="#{episode.episode_url}" target="_blank" style="color: white;font-size:1em" #{episode.name}
+              hr
+              span.episode.attribute 【Episode MP3 URL】&nbsp
+              a.btn.btn-primary.episode.episode_url href="#{episode.episode_mp3_url}" target="_blank" style="color: white;font-size:1em" #{episode.name}
+
+          .right-sidebar.col-lg-9.border.border-secondary.rounded
+            div
+              button.mb-2.btn.btn-primary.mr-2(type="button" data-bs-toggle="modal" data-bs-target="#PodcastDifficultyModal")
+                        | Click to View Podcast difficulty information
+              button.mb-2.btn.btn-primary(type="button" data-bs-toggle="modal" data-bs-target="#VocabDifficultyModal")
+                        | Click to View Key Vocabulary
+              div.d-flex
+                table.table.table-bordered.mr-2
+                  thead
+                    tr
+                      th.col-2.h5.font-weight-bold  colspan="2" Podcast Difficulty
+                    tr
+                      th.col-3 Score
+                      th.col-3 Level
+                  tbody
+                    - difficulty_score = episode.difficulty_score # 這裡可以根據實際情況設置 difficulty 的值 三種顏色
+                    - adjust_weight = 1.5
+                    - adjusted_score = (episode.difficulty_score * adjust_weight > 100) ? 100 : (episode.difficulty_score * adjust_weight)
+                    - if adjusted_score < 60
+                      - difficulty = 'easy'
+                    - elsif adjusted_score < 70
+                      - difficulty = 'moderate'
+                    - else
+                      - difficulty = 'difficult'
+                    tr
+                      td.col-3 #{adjusted_score.round} / 100
+                      td.col-3(class=difficulty)
+                        span.difficulty-text.strong
+                          - if difficulty == "difficult"
+                            | Difficult
+                          - elsif difficulty == "moderate"
+                            | Moderate
+                          - elsif difficulty == "easy"
+                            | Easy
+
+                table.table.table-bordered
+                  thead
+                    tr
+                      th.col-2.h5.font-weight-bold  colspan="2" Language Learning
+
+                    tr
+                      th.col-3 Score
+                      th.col-3 Grade
+                  tbody
+                    td.col-3.score
+                        | Learning...
+                    td.col-3.gpa
+                        | Learning...
+
+            hr.title_txt
+            .scrollable-content
+              h3.title_txt.d-flex.justify-content-around
+                i.bi.bi-bookmarks-fill Transcript
+                i.bi.bi-globe  Convert
+                i.bi.bi-bookmarks-fill Translation
+              hr.thead_hr
+              div.list-group.transcript-content
+                - sentences = JSON.parse(episode.sentence_segments)
+                - translate_array = JSON.parse(episode.translation)
+                - sentences_length = sentences.length
+                - sentences.each_with_index do |sentence, line_index|
+                  div.row.d-flex.align-items-center.small
+                      div.small.text-gray.col-lg-5.col-sm-6.d-flex
+                        div
+                          | &nbsp;
+                          = sentence
+                          | &nbsp;
+                      div.col-lg-2.col-2.button-frame.d-flex.align-items-center.justify-content-center.vcenter.border-left.border-right
+                          button.btn.btn-link.pr-3.pl-3.btn-outline-warning(type="button" onclick="toggleSentenceTranslation(#{line_index})" data-toggle="tooltip" data-placement="top" title="Click to translate" )
+                            i.bi.bi-arrow-right.arrow-hover(style="font-size: 1.5rem;")
+                      div.col-lg-5.col-sm-6.text-gray(data-new-content="episode_translate_array_row" id="translation_#{line_index}" style="display:none;")
+                        = translate_array[line_index]
+                  hr.thead_hr
+              div.d-flex.justify-content-center.mt-3
+                a.pr-5.pl-5.btn.btn-outline-success.mr-2(href="#" style="font-size:1em" onclick="calculateScore(#{sentences_length})") Done
+                a.pr-5.pl-5.btn.btn-outline-dark(href="#" style="font-size:1em" onclick="LearningStateReset(#{sentences_length})") Reset
+
+  #VocabDifficultyModal.modal(tabindex="-1" role="dialog" aria-labelledby="VocabDifficultyModalLabel" aria-hidden="true")
+      .modal-dialog
+        .modal-content
+          .modal-header
+            h5.modal-title#VocabDifficultyModalLabel
+              i.bi.bi-alphabet Key Vocabulary
+            button.btn-close(type="button" data-bs-dismiss="modal" aria-label="Close")
+          .modal-body
+            button#toggleButton.btn-info(style="background : #17a2b8") Show / Hide Pie Chart
+            .canvas-container(style="max-width: 300px; max-height: 300px; overflow: hidden; display: flex; align-items: center; justify-content: center; margin: auto")
+
+              canvas#VocabDifficultyChart(style="max-width: 100%; max-height: 100%;display: block;")
+
+            ul.nav.nav-tabs.justify-content-center.mb-3.mt-4
+              li.nav-item.mr-1
+                a.nav-link.active(href="#tab1" data-bs-toggle="tab") All
+              li.nav-item.mr-1
+                a.nav-link(href="#tab2" data-bs-toggle="tab") Difficult
+              li.nav-item.mr-1
+                a.nav-link(href="#tab3" data-bs-toggle="tab") Moderate
+              li.nav-item
+                a.nav-link(href="#tab4" data-bs-toggle="tab") Easy
+
+            .tab-content
+              #tab1.tab-pane.show.active
+                ul(style="display: flex; flex-wrap: wrap;")
+                  - word_array = JSON.parse(episode.word_dict).keys
+                  - word_count = word_array.length
+                  - word_array.each_with_index do |word, index|
+                    li(style="flex: 0 0 33.33%;")= "#{word}"
+                | #{word_count}
+              #tab2.tab-pane
+                ul(style="display: flex; flex-wrap: wrap;")
+                  - difficult_word_array = JSON.parse(episode.difficult_words).keys
+                  - difficult_word_count = difficult_word_array.length
+                  - difficult_word_array.each_with_index do |word, index|
+                    li(style="flex: 0 0 33.33%;")= "#{word}"
+                | #{difficult_word_count}
+              #tab3.tab-pane
+                ul(style="display: flex; flex-wrap: wrap;")
+                  - moderate_word_array = JSON.parse(episode.moderate_words).keys
+                  - moderate_word_count = moderate_word_array.length
+                  - moderate_word_array.each_with_index do |word, index|
+                    li(style="flex: 0 0 33.33%;")= "#{word}"
+                | #{moderate_word_count}
+              #tab4.tab-pane
+                ul(style="display: flex; flex-wrap: wrap;")
+                  - easy_word_array = JSON.parse(episode.easy_words).keys
+                  - easy_word_count = easy_word_array.length
+                  - easy_word_array.each_with_index do |word, index|
+                    li(style="flex: 0 0 33.33%;")= "#{word}"
+                | #{easy_word_count}
+            .modal-footer
+              button.btn.btn-outline-info(type="button" data-bs-dismiss="modal") Close
+
+
+  #PodcastDifficultyModal.modal(tabindex="-1" role="dialog" aria-labelledby="PodcastDifficultyModalLabel" aria-hidden="true")
+      .modal-dialog
+        .modal-content
+          .modal-header
+            h5.modal-title#PodcastDifficultyModalLabel
+              i.bi.bi-alphabet Podcast Difficulty Information
+
+            button.btn-close(type="button" data-bs-dismiss="modal" aria-label="Close")
+          .modal-body
+            .canvas-container(style="max-width: 2000px; max-height: 2000px; overflow: hidden; display: flex; align-items: center; justify-content: center; margin: auto")
+              canvas#PodcastDifficultyChart(style="max-width: 100%; max-height: 100%;")
+
+
   script.
-    | document.addEventListener('DOMContentLoaded', function () {
-    |   var offcanvas = new bootstrap.Offcanvas(document.getElementById('demo'));
+    | var arrowRightClickCount = 0;
+    | var translatedID = new Set();
+
+    | function toggleSentenceTranslation(index) {
+    |   var translationContent = document.getElementById('translation_' + index);
+    |   translationContent.style.display = (translationContent.style.display === 'none' || translationContent.style.display === '') ? 'block' : 'block';
+    |   if (translationContent.style.display === 'block' && !translatedID.has(index)){
+    |     arrowRightClickCount++;
+    |     translatedID.add(index);
+    |     console.log('Click Rate:', arrowRightClickCount);
+    |     console.log('translatedID:', Array.from(translatedID));
+    |   }
+    | }
+
+    | function LearningStateReset(sentences_length) {
+    |   for (var index = 0; index < sentences_length; index++){
+    |     var translationContent = document.getElementById('translation_' + index);
+    |     translationContent.style.display = 'none';
+    |   }
+    |   document.querySelector('.col-3.score').textContent = "Learning...";
+    |   document.querySelector('.col-3.gpa').textContent = "Learning...";
+    |   arrowRightClickCount = 0;
+    |   translatedID = new Set();
+    | }
+
+    | function getGrade(score) {
+    | switch (true) {
+    |   case score >= 90:
+    |     return 'A+';
+    |   case score >= 85:
+    |     return 'A';
+    |   case score >= 80:
+    |     return 'A-';
+    |   case score >= 75:
+    |     return 'B+';
+    |   case score >= 70:
+    |     return 'B';
+    |   case score >= 65:
+    |     return 'B-';
+    |   case score >= 60:
+    |     return 'C+';
+    |   case score >= 50:
+    |     return 'C';
+    |   case score >= 40:
+    |     return 'C-';
+    |   case score >= 30:
+    |     return 'D';
+    |   default:
+    |     return 'F';
+    |   }
+    | }
+
+    | function calculateScore(sentences_length) {
+    |   var newScore = 100 - ((arrowRightClickCount / sentences_length) * 100);
+    |   var roundedScore = Math.round(newScore);
+    |   document.querySelector('.col-3.score').textContent = roundedScore;
+    |   document.querySelector('.col-3.gpa').textContent = getGrade(roundedScore);
+    | }
+
+  script.
+    |  document.addEventListener('DOMContentLoaded', function() {
+    |    var canvas = document.getElementById('VocabDifficultyChart');
+    |    var button = document.getElementById('toggleButton');
+    |
+    |    button.addEventListener('click', function() {
+    |      if (canvas.style.display === 'none' || canvas.style.display === '') {
+    |        canvas.style.display = 'block';
+    |      } else {
+    |        canvas.style.display = 'none';
+    |      }
+    |    });
+    |  });
+
+  script.
+    | function drawPieChart(difficultyData) {
+    |   var ctx = document.getElementById('VocabDifficultyChart').getContext('2d');
+    |   var DoughnutChart = new Chart(ctx, {
+    |     type: 'doughnut',
+    |     data: {
+    |       labels: ['Difficult', 'Moderate', 'Easy'],
+    |       datasets: [{
+    |         data: difficultyData,
+    |         backgroundColor: ['rgba(255, 99, 132, 0.8)', 'rgba(255, 205, 86, 0.8)', 'rgba(75, 192, 192, 0.8)'],
+    |       }],
+    |       },
+    |     });
+    |  };
+    | $(document).ready(function () {
+    |   var difficultyData = [#{difficult_word_count}, #{moderate_word_count}, #{easy_word_count}];
+    |   drawPieChart(difficultyData);
+
     | });
 
-  /fail sidebar code
-  / .container
-  /   div.wrapper.d-flex.align-items-stretch
-  /     nav#sidebar
-  /       div.custom-menu
-  /         button.btn.btn-primary.rounded-circle type="button" id="sidebarCollapse" class="sr-only"
-  /           i.bi.bi-justify
-  /           span.sr-only
-  /       div.p-4.pt-5
-  /         h1
-  /           a.logo href="/" Splash
-  /         ul.list-unstyled.components.mb-5
-  /           li.active
-  /             a.dropdown-toggle href="#homeSubmenu" data-toggle="collapse" aria-expanded="false" Home
-  /               ul.collapse.list-unstyled#homeSubmenu
-  /                 li
-  /                   a href="#" Home 1
-  /                 li
-  /                   a href="#" Home 2
-  /                 li
-  /                   a href="#" Home 3
-  /           li
-  /             a href="#" About
-  /           li
-  /             a.dropdown-toggle href="#pageSubmenu" data-toggle="collapse" aria-expanded="false" Pages
-  /               ul.collapse.list-unstyled#pageSubmenu
-  /                 li
-  /                   a href="#" Page 1
-  /                 li
-  /                   a href="#" Page 2
-  /                 li
-  /                   a href="#" Page 3
-  /           li
-  /             a href="#" Portfolio
-  /           li
-  /             a href="#" Contact
-  /         div.footer
-  /           p
-  /             | Copyright &copy;
-  /             script
-  /               | document.write(new Date().getFullYear());
-  /             | All rights reserved | This template is made with
-  /             i.icon-heart aria-hidden="true"
-  /             | by
-  /             a href="https://transound.com" target="_blank" Transound.com
-  /     div#content.p-4.p-md-5.pt-5
-  /       h2.mb-4 Sidebar #02
-  /       p
-  /         | Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-  /       p
-  /         | Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+  script.
+    | function drawHorizontalBarChart(difficultyData) {
+    |   var ctx = document.getElementById('PodcastDifficultyChart').getContext('2d');
+    |   var horizontalBarChart = new Chart(ctx, {
+    |     type: 'bar',
+    |     data: {
+    |       labels: ['Total word counts', 'Total sentence counts', 'Words per 10 seconds', 'Words per minutes', 'Total difficult vocabularies', 'Total moderate vocabularies', 'Total easy vocabularies'],
+    |       datasets: [{
+    |         label: 'Horizontal Bar Chart',
+    |         data: difficultyData,
+    |         backgroundColor: [
+    |           'rgba(255, 99, 132, 0.2)',
+    |           'rgba(255, 159, 64, 0.2)',
+    |           'rgba(255, 205, 86, 0.2)',
+    |           'rgba(75, 192, 192, 0.2)',
+    |           'rgba(54, 162, 235, 0.2)',
+    |           'rgba(153, 102, 255, 0.2)',
+    |           'rgba(201, 203, 207, 0.2)'
+    |         ],
+    |         borderColor: [
+    |           'rgb(255, 99, 132)',
+    |           'rgb(255, 159, 64)',
+    |           'rgb(255, 205, 86)',
+    |           'rgb(75, 192, 192)',
+    |           'rgb(54, 162, 235)',
+    |           'rgb(255, 159, 64)',
+    |           'rgb(255, 205, 86)',
+    |           'rgb(75, 192, 192)',
+    |           'rgb(54, 162, 235)',
+    |           'rgb(153, 102, 255)',
+    |           'rgb(201, 203, 207)'
+    |         ],
+    |         borderWidth: 1
+    |       }]
+    |     },
+    |     options: {
+    |       scales: {
+    |         x: {
+    |           beginAtZero: true
+    |         }
+    |       },
+    |       indexAxis: 'y'
+    |     }
+    |   });
+    | }
 
-  /   script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"
-  /   script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"
-  /   script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"
-  /   script src="js/main.js"
+    | $(document).ready(function () {
+    |   var difficultyData = [#{total_word_counts},#{sentences_length},#{podcast_length},#{word_count},#{difficult_word_count},#{moderate_word_count},#{easy_word_count}];
+    |   drawHorizontalBarChart(difficultyData);
 
-
-
-
-  / second episode
-  / .container
-  /   .row
-  /     .left-sidebar.col-lg-4.col-md-3.d-flex.flex-column.align-items-center
-  /       h2.mt-4
-  /         span.decoration
-  /           | Episode_Info
-  /         div.center
-  /           img.episode.images[src = episode.images alt = "#{episode.images}" style="width: 80%; height: auto;margin:10%;border-radius: 50%;"]
-  /       .col-lg-11.col-md-10.col-sm-6
-  /           episode.release_date
-  /             = episode.release_date
-  /           episode.language
-  /             = episode.language
-  /       / .episode.type
-  /       / = episode.type.capitalize + ":"
-  /       .episode.name.mt-4
-  /         a(href="https://open.spotify.com/show/5Vv32KtHB3peVZ8TeacUty")
-  /           = episode.name
-  /       .episode-description.mt-4
-  /           button.collapse-button(type="button")
-  /             | Show/Hide Description
-  /       .col-lg-8.col-md-10.col-sm-6
-  /           .collapsible-content
-  /             span.episode.description
-  /               = episode.description
-  /       / .episode-attribute
-  /       / span.episode.attribute Publisher:
-  /     .right-sidebar.col-lg-9.col-md-9
-  /       .scrollable-content
-  /         h2
-  /           i.bi.bi-bookmarks-fill
-  /           |  Transcript
-  /         hr
-
-  /           div.list-group
-  /           a.list-group-item.list-group-item-action href="#"
-  /             div.row
-  /               div.col-md-9
-  /                 div.small.text-gray
-  /                   | 2023/10/21
-  /                 div
-  /                   | Ep01
-  /                 div
-  /                   | description1
-  /               div.col-md-3.d-flex.flex-column.align-items-end.justify-content-center
-  /                 i.bi.bi-chevron-right
-  /           a.list-group-item.list-group-item-action href="#"
-  /             div.row
-  /               div.col-md-9
-  /                 div.small.text-gray
-  /                   | 2023/10/20
-  /                 div
-  /                   | Ep02
-  /                 div
-  /                   | description2
-  /               div.col-md-3.d-flex.flex-column.align-items-end.justify-content-center
-  /                 i.bi.bi-chevron-right
-  /           a.list-group-item.list-group-item-action href="#"
-  /               div.row
-  /                 div.col-md-9
-  /                   div.small.text-gray
-  /                     | 2023/10/19
-  /                   div
-  /                     | Ep03
-  /                   div
-  /                     | description3
-  /                 div.col-md-3.d-flex.flex-column.align-items-end.justify-content-center
-  /                   i.bi.bi-chevron-right
-  /           a.list-group-item.list-group-item-action href="#"
-  /               div.row
-  /                 div.col-md-9
-  /                   div.small.text-gray
-  /                     | 2023/10/19
-  /                   div
-  /                     | Ep03
-  /                   div
-  /                     | description3
-  /                 div.col-md-3.d-flex.flex-column.align-items-end.justify-content-center
-  /                   i.bi.bi-chevron-right
-  /           a.list-group-item.list-group-item-action href="#"
-  /               div.row
-  /                 div.col-md-9
-  /                   div.small.text-gray
-  /                     | 2023/10/19
-  /                   div
-  /                     | Ep03
-  /                   div
-  /                     | description3
-  /                 div.col-md
+    | });
