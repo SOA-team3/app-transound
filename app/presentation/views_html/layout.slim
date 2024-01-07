@@ -21,43 +21,13 @@ html
     == assets(:css)
     == assets(:js, defer: true)
 
+    /episode chart plot
+    script src="https://cdn.jsdelivr.net/npm/chart.js"
     /episode download transcript
     script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha384-u7U/CqnDLyzKPgFqF76W9L8/RSJoZqU2HT4J8BAT5sa5InV6tIpm6sFZuFeF+4Sc" crossorigin="anonymous"
     script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.0.2/mammoth.browser.min.js" integrity="sha384-jkycEJ7VAD3c3Z8ij1Fxl04frwRd+ZBtEPzvzG/CzPC1zjAal4s6Pl1m5yxMKDvW" crossorigin="anonymous"
-
-    /download episode transcript some bug still exist
-    / script.
-    /   $(document).ready(function(){
-    /     $('[data-toggle="tooltip"]').tooltip();
-
-    /     // Get the HTML content inside an element with the class .transcript-content
-    /     $('.download-btn').on('click', function() {
-    /       var content = $('.transcript-content').html();
-    /       convertToWord(content);
-    /     });
-
-    /     // Use mammoth.js to extract raw text from HTML
-    /     function convertToWord(htmlContent) {
-    /       mammoth.extractRawText({ array: htmlContent })
-    /         .then(displayResult)
-    /         .catch(handleError);
-    /     }
-
-    /     // Create a Blob containing the converted text with Word document MIME type
-    /     function displayResult(result) {
-    /       var blob = new Blob([result.value], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
-    /       var link = document.createElement("a");
-    /       link.href = window.URL.createObjectURL(blob);
-    /       link.download = "transcript.docx";
-    /       link.click();
-    /     }
-
-    /     // Log an error message to the console
-    /     function handleError(error) {
-    /       console.error('Error converting to Word:', error);
-    /     }
-    /   });
-
+    /reading yaml file
+    script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"
   body
     / Popper
     script{
@@ -82,22 +52,23 @@ html
       crossorigin="anonymous"
     }
 
-    .container id='html_body'
+    .container.p-5 id='html_body'
       section
         .row style="vertical-align: middle"
           .col-12
             h1
-              a.text-underline-hover href="/" TranSound
-
+              / a.text-underline-hover href="/" TranSound
+              a href="/"
+                img.logo src="https://i.imgur.com/NdcTQlO.png" title="source: imgur.com"
       section
         include :flash_bar
         == yield
 
-      footer
+      footer.footer_p
         = "TranSound is made for demonstration purposes. We cannot warrant full correctness of all content. TranSound may use cookies for sessions but does not track users."
 
-        / not yet
-        - require 'yaml'
-          CONFIG = YAML.safe_load_file('config/secrets.yml')
-          TOKENTIME = CONFIG[spotify_gettoken_time]
-          td text="Token time: #{TOKENTIME}"
+    / not yet
+  - require 'yaml'
+    CONFIG = YAML.safe_load_file('config/secrets.yml')
+    TOKENTIME = CONFIG[spotify_gettoken_time]
+    td text="Token time: #{TOKENTIME}"

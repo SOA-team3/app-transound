@@ -36,12 +36,12 @@ module TranSound
         Failure('Cannot add podcast info right now; please try again later')
       end
 
-      def reify_podcast_info(input_json)
-        puts "add: #{input_json}"
+      def reify_podcast_info(input)
+        puts "add: #{input}"
         if @type == 'episode'
-          handle_reify_episode(input_json)
+          handle_reify_episode(input)
         elsif @type == 'show'
-          handle_reify_show(input_json)
+          handle_reify_show(input)
         end
       rescue StandardError => e
         App.logger.error e.backtrace.join("\n")
@@ -51,9 +51,9 @@ module TranSound
       # following are support methods that other services could use
 
       def handle_request_episode(input)
-        result = Gateway::Api.new(TranSound::App.config)
+        input[:response] = Gateway::Api.new(TranSound::App.config)
           .add_episode(input[:type], input[:id])
-        result.success? ? Success(result.payload) : Failure(result.message)
+        input[:response].success? ? Success(input) : Failure(input[:response].message)
       end
 
       def handle_request_show(input)
@@ -62,15 +62,19 @@ module TranSound
         result.success? ? Success(result.payload) : Failure(result.message)
       end
 
-      def handle_reify_episode(episode_json)
-        puts "episode_json: #{episode_json}"
-        Representer::Episode.new(OpenStruct.new)
-          .from_json(episode_json)
-          .then { |episode| Success(episode) }
+      def handle_reify_episode(input)
+        puts "episode_json: #{input}"
+
+        unless input[:response].processing?
+          Representer::Episode.new(OpenStruct.new)
+            .from_json(input[:response].payload)
+            .then { input[:episode] = _1 }
+        end
+
+        Success(input)
       end
 
       def handle_reify_show(show_json)
-        puts "show_json: #{show_json}"
         Representer::Show.new(OpenStruct.new)
           .from_json(show_json)
           .then { |show| Success(show) }
