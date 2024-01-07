@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
+
 require_relative 'list_request'
 require 'http'
+
 
 module TranSound
   module Gateway
@@ -13,25 +15,31 @@ module TranSound
         @request = Request.new(@config)
       end
 
+
       def alive?
         @request.get_root.success?
       end
+
 
       def episodes_list(list)
         @request.episodes_list(list)
       end
 
+
       def add_episode(type, id)
         @request.add_episode(type, id)
       end
+
 
       def shows_list(list)
         @request.shows_list(list)
       end
 
+
       def add_show(type, id)
         @request.add_show(type, id)
       end
+
 
       # Gets view of a podcast info for episode or show from API
       # - req: PodcastInfoRequestPath
@@ -40,6 +48,7 @@ module TranSound
         @request.view_podcast_info(req)
       end
 
+
       # HTTP request transmitter
       class Request
         def initialize(config)
@@ -47,40 +56,50 @@ module TranSound
           @api_root = "#{config.API_HOST}/api/v1"
         end
 
+
         def get_root # rubocop:disable Naming/AccessorMethodName
           call_api('get')
         end
 
+
         def episodes_list(list)
-          call_api('get', ['podcast_info/episode'],
+          puts "app, transound_api, episodes_list: #{Value::WatchedList.to_encoded(list)}"
+          call_api('get', ['podcast_info'],
                    'list' => Value::WatchedList.to_encoded(list))
         end
+
 
         def add_episode(type, id)
           call_api('post', ['podcast_info', type, id])
         end
 
+
         def shows_list(list)
-          puts "api, shows_list: #{shows_list}"
-          call_api('get', ['podcast_info/show'],
+          puts "app, transound_api, shows_list: #{Value::WatchedList.to_encoded(list)}"
+          call_api('get', ['podcast_info'],
                    'list' => Value::WatchedList.to_encoded(list))
         end
+
 
         def add_show(type, id)
           puts "api, add_show: #{type} + #{id}"
           call_api('post', ['podcast_info', type, id])
         end
 
+
         def view_podcast_info(req)
           call_api('get', ['podcast_info', req.type, req.id])
         end
 
+
         private
+
 
         def params_str(params)
           params.map { |key, value| "#{key}=#{value}" }.join('&')
             .then { |str| str ? "?#{str}" : '' }
         end
+
 
         def call_api(method, resources = [], params = {})
           api_path = resources.empty? ? @api_host : @api_root
@@ -93,35 +112,44 @@ module TranSound
         end
       end
 
+
       # Decorates HTTP responses with success/error
       class Response < SimpleDelegator
         NotFound = Class.new(StandardError)
 
+
         SUCCESS_CODES = (200..299)
+
 
         def success?
           code.between?(SUCCESS_CODES.first, SUCCESS_CODES.last)
         end
 
+
         def payload
           body.to_s
         end
+
 
         def failure?
           !success?
         end
 
+
         def ok?
           code == 200
         end
+
 
         def added?
           code == 201
         end
 
+
         def processing?
           code == 202
         end
+
 
         def message
           JSON.parse(payload)['message']
@@ -130,3 +158,6 @@ module TranSound
     end
   end
 end
+
+
+
