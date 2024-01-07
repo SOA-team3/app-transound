@@ -18,13 +18,20 @@ Metrics/BlockLength:
     - 'rakefile.rb'
     - 'app/controllers/app.rb'
     - 'app/application/controllers/**/*.rb'
-    - spec/**/*
+    - 'config/environment.rb'
+
 
 # ignore method length in rebuilding entity only
 Metrics/MethodLength:
   Enabled: true
   Exclude:
     - 'app/models/repositories/episodes.rb'
+
+# ignore class length in controllers/app.rb
+Metrics/ClassLength:
+  Enabled: true
+  Exclude:
+    - 'app/application/controllers/app.rb'
 
 # See: https://www.rubydoc.info/gems/rubocop/RuboCop/Cop/Layout/MultilineMethodCallIndentation
 Layout/MultilineMethodCallIndentation:
@@ -44,4 +51,9 @@ Style/RedundantAssignment:
 Style/OpenStructUse:
   Enabled: true
   Exclude:
-    - 'app/*'
+    - 'app/application/services/view_podcast_info.rb'
+    - 'app/application/services/add_podcast_info.rb'
+    - 'app/application/services/list_podcast_infos.rb'
+    - 'app/application/representers/openstruct_with_links.rb'
+    - 'app/application/representers/episodes_view.rb'
+    - 'app/application/representers/shows_view.rb'
