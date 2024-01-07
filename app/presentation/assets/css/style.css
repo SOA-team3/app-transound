@@ -8619,3 +8619,15 @@ body{
   width: 200px ;
   height: 68px ;
 }
+
+.right-bg,.arrow-warning{
+  background: #f7ca4d;
+  color: #fff;
+  border-radius: 4%;
+}
+.right-bg:hover,.arrow-warning:hover{
+  border: 2px solid #f7ca4d;
+  background: #fff;
+  color: #f7ca4d;
+  border-radius: 4%;
+}

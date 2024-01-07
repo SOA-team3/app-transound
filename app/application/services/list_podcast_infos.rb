@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
+
 require 'dry/monads'
+
 
 module TranSound
   module Service
@@ -8,10 +10,13 @@ module TranSound
     class ListEpisodes
       include Dry::Transaction
 
+
       step :get_api_list
       step :reify_list
 
+
       private
+
 
       def get_api_list(episodes_list)
         puts "list1: #{episodes_list}"
@@ -24,6 +29,7 @@ module TranSound
         Failure('Could not access our API')
       end
 
+
       def reify_list(episodes_json)
         puts "list2: #{episodes_json}"
         Representer::EpisodesList.new(OpenStruct.new)
@@ -34,14 +40,18 @@ module TranSound
       end
     end
 
+
     # Retrieves array of all listed show entities
     class ListShows
       include Dry::Transaction
 
+
       step :get_api_list
       step :reify_list
 
+
       private
+
 
       def get_api_list(shows_list)
         puts "list3: #{shows_list}"
@@ -54,6 +64,7 @@ module TranSound
         Failure('Could not access our API')
       end
 
+
       def reify_list(shows_json)
         puts "list4: #{shows_json}"
         Representer::ShowsList.new(OpenStruct.new)
@@ -65,3 +76,6 @@ module TranSound
     end
   end
 end
+
+
+
