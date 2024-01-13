@@ -1,0 +1,52 @@
+hr
+.container
+    .row
+      .left-sidebar.col-lg-4.d-flex.flex-column.align-items-center.p-3
+        h2.mt-4
+          span.decoration
+            | Show Information
+
+          div.center
+            img.show.images[src = show.images alt = "#{show.images}" ]
+        / .show.type
+        / = show.type.capitalize + ":"
+        div.text-center
+          h3.show.name.mt-4 style="padding-left:20px"
+            = show.name
+        span.show.attribute
+          | Publisher:&nbsp
+        div = show.publisher
+        hr.thead_hr
+        span.show.attribute
+          | Description:&nbsp
+        div = show.description
+        hr.thead_hr
+        span.episode.attribute 【Show URL】&nbsp
+        a.btn.btn-primary.episode.episode_url href="#{show.show_url}" target="_blank" style="color: white;font-size:1em" Click here to visit Spotify Show page-#{show.name}
+
+        / a.episode.episode_url href="#{show.show_url}" Click here to visit Spotify Show page-#{show.name}
+
+      .right-sidebar.col-lg-8
+        .scrollable-content
+          h2.title_txt
+            i.bi.bi-bookmarks-fill
+            |  Latest Episodes
+          hr
+          - require 'json'
+          - recent_episodes_array = JSON.parse(show.recent_episodes)
+
+          div.list-group
+          - recent_episodes_array.each_with_index do |episode, index|
+            div.row.border.p-1
+              div.col-md-11.border-right
+                div.small.text-gray
+                  | Release Date: #{episode['release_date']}
+                div
+                div
+                  | <h5><strong>Ep#{index+1} - #{episode['name']}</strong>
+                div
+                  | <strong>Description:</strong> <br>#{episode['description']}
+              a.col-md-1.d-flex.flex-column.align-items-center.justify-content-center.d-block(href="https://open.spotify.com/show/5Vv32KtHB3peVZ8TeacUty" target="_blank")
+                |
+                i.bi.bi-chevron-right.right-bg.p-3.pt-5.pb-5
+          / button.btn.btn-primary.mt-4 Click to Load more...
