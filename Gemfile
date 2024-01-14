@@ -50,9 +50,9 @@ group :development, :test do
   gem 'sqlite3', '~> 1.0'
 end
 
-# group :production do
-#   gem 'pg'
-# end
+group :production do
+  gem 'pg'
+end
 
 # TESTING
 group :test do
